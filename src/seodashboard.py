@@ -1,4 +1,3 @@
-# File: seo_analysis_dashboard.py
 import pandas as pd
 import tkinter as tk
 from tkinter import ttk, messagebox
@@ -8,7 +7,7 @@ class SEOAnalysisDashboard:
     def __init__(self, root):
         self.root = root
         self.root.title("SEO Analysis Dashboard")
-        self.root.geometry("1400x500")
+        self.root.geometry("1400x800")
 
         self.initialize_data()
         self.create_layout()
@@ -47,6 +46,8 @@ class SEOAnalysisDashboard:
             state="readonly",
             width=30
         )
+
+        #the dropdown menu
         self.product_group_dropdown.grid(row=1, column=0, sticky=tk.W, pady=5)
         self.product_group_dropdown.bind('<<ComboboxSelected>>', self.update_dashboard)
 
@@ -72,18 +73,12 @@ class SEOAnalysisDashboard:
         self.impressions_label.pack(side=tk.LEFT, padx=10)
         self.ctr_label = ttk.Label(self.metrics_frame, text="Avg CTR: -", font=("Arial", 12))
         self.ctr_label.pack(side=tk.LEFT, padx=10)
-        self.notebook = ttk.Notebook(dashboard_frame)
-        self.notebook.pack(fill=tk.BOTH, expand=True, pady=10)
 
-        self.create_page_performance_tab()
-
-
-    def create_page_performance_tab(self):
-        page_performance_frame = ttk.Frame(self.notebook)
-        self.notebook.add(page_performance_frame, text="Page Performance")
+        self.page_performance_frame = ttk.Frame(dashboard_frame)
+        self.page_performance_frame.pack(fill=tk.X, pady=10)
 
         self.page_performance_tree = ttk.Treeview(
-            page_performance_frame,
+            self.page_performance_frame,
             columns=("First Level", "Clicks", "Impressions", "CTR", "Position"),
             show="headings"
         )
@@ -93,11 +88,30 @@ class SEOAnalysisDashboard:
         self.page_performance_tree.heading("CTR", text="CTR (%)")
         self.page_performance_tree.heading("Position", text="Position")
 
-        page_scrollbar = ttk.Scrollbar(page_performance_frame, orient=tk.VERTICAL, command=self.page_performance_tree.yview)
+        page_scrollbar = ttk.Scrollbar(self.page_performance_frame, orient=tk.VERTICAL, command=self.page_performance_tree.yview)
         self.page_performance_tree.configure(yscroll=page_scrollbar.set)
 
         self.page_performance_tree.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
         page_scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
+        self.top_queries_frame = ttk.Frame(dashboard_frame)
+        self.top_queries_frame.pack(fill=tk.X, pady=10)
+
+        self.top_queries_tree = ttk.Treeview(
+            self.top_queries_frame,
+            columns=("Top Queries", "Clicks", "Impressions", "CTR", "Position"),
+            show="headings"
+        )
+        self.top_queries_tree.heading("Top Queries", text="Top Queries")
+        self.top_queries_tree.heading("Clicks", text="Clicks")
+        self.top_queries_tree.heading("Impressions", text="Impressions")
+        self.top_queries_tree.heading("CTR", text="CTR (%)")
+        self.top_queries_tree.heading("Position", text="Position")
+
+        top_queries_scrollbar = ttk.Scrollbar(self.top_queries_frame, orient=tk.VERTICAL, command=self.top_queries_tree.yview)
+        self.top_queries_tree.configure(yscroll=top_queries_scrollbar.set)
+
+        self.top_queries_tree.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
+        top_queries_scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
 
     def update_dashboard(self, event=None):
         try:
@@ -105,29 +119,35 @@ class SEOAnalysisDashboard:
             start_date = self.start_date_entry.get_date()
             end_date = self.end_date_entry.get_date()
 
+            # Filter pages based on product group and date range
             item_numbers = self.items_catalog[self.items_catalog['item_product_group'] == selected_group]['item_number'].tolist()
             filtered_pages = self.seo_pages[
                 (self.seo_pages['Mon-Year'] >= pd.to_datetime(start_date)) &
                 (self.seo_pages['Mon-Year'] <= pd.to_datetime(end_date))
             ]
-            #(r'([^/]+)$')[0]
+
+
+            #a
             if item_numbers:
                 #filtered_pages = filtered_pages[filtered_pages['Page'].str.contains('|'.join(item_numbers))]
                 filtered_pages.loc[:, 'First Level'] = filtered_pages['Page'].str.split('/').str[1]
                 filtered_pages.loc[:,'Item Number']= filtered_pages['Page'].str.extract(r'([^/]+)$')[0]
-
-                # if the first level is " " then remove
                 filtered_pages = filtered_pages[filtered_pages['First Level'] != " "]
 
             self.update_metrics(filtered_pages)
             self.populate_page_performance_tree(filtered_pages)
 
+            # Filter queries based on product group and date range
+            filtered_queries = self.seo_queries[
+                (self.seo_queries['Mon-Year'] >= pd.to_datetime(start_date)) &
+                (self.seo_queries['Mon-Year'] <= pd.to_datetime(end_date))
+            ]
+            self.populate_top_queries_tree(filtered_queries)
+
         except Exception as e:
             messagebox.showerror("Update Error", f"An error occurred: {e}")
 
     def update_metrics(self, filtered_pages):
-
-        #metrics on mean or sum
         total_clicks = filtered_pages['Clicks'].sum()
         total_impressions = filtered_pages['Impressions'].sum()
         avg_ctr = filtered_pages['CTR'].mean() * 100 if not filtered_pages.empty else 0
@@ -146,7 +166,6 @@ class SEOAnalysisDashboard:
             'CTR': 'mean',
             'Position': 'mean'
         }).sort_values('Clicks', ascending=False)
-        #first 7
         page_performance = page_performance.head(7)
 
         for first_level, row in page_performance.iterrows():
@@ -154,13 +173,27 @@ class SEOAnalysisDashboard:
                 first_level, row['Clicks'], row['Impressions'], f"{row['CTR']*100:.2f}%", f"{row['Position']:.2f}"
             ))
 
+    def populate_top_queries_tree(self, filtered_queries):
+        for i in self.top_queries_tree.get_children():
+            self.top_queries_tree.delete(i)
 
+        top_queries = filtered_queries.groupby('Top queries').agg({
+            'Clicks': 'sum',
+            'Impressions': 'sum',
+            'CTR': 'mean',
+            'Position': 'mean'
+        }).sort_values('Clicks', ascending=False)
+        top_queries = top_queries.head(7)
+
+        for query, row in top_queries.iterrows():
+            self.top_queries_tree.insert("", tk.END, values=(
+                query, row['Clicks'], row['Impressions'], f"{row['CTR']*100:.2f}%", f"{row['Position']:.2f}"
+            ))
 
 def start_app():
     root = tk.Tk()
     app = SEOAnalysisDashboard(root)
     root.mainloop()
-
 
 if __name__ == "__main__":
     start_app()
