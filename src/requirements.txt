@@ -1,0 +1,9 @@
+tkinter
+pandas
+sqlite3
+matplotlib
+re
+sklearn
+numpy
+seaborn
+openai
