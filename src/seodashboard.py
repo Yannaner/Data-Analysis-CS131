@@ -66,14 +66,12 @@ class SEOAnalysisDashboard:
 
         self.metrics_frame = ttk.Frame(dashboard_frame)
         self.metrics_frame.pack(fill=tk.X, pady=10)
-
         self.clicks_label = ttk.Label(self.metrics_frame, text="Total Clicks: -", font=("Arial", 12))
         self.clicks_label.pack(side=tk.LEFT, padx=10)
         self.impressions_label = ttk.Label(self.metrics_frame, text="Total Impressions: -", font=("Arial", 12))
         self.impressions_label.pack(side=tk.LEFT, padx=10)
         self.ctr_label = ttk.Label(self.metrics_frame, text="Avg CTR: -", font=("Arial", 12))
         self.ctr_label.pack(side=tk.LEFT, padx=10)
-
         self.notebook = ttk.Notebook(dashboard_frame)
         self.notebook.pack(fill=tk.BOTH, expand=True, pady=10)
 
@@ -112,12 +110,13 @@ class SEOAnalysisDashboard:
                 (self.seo_pages['Mon-Year'] >= pd.to_datetime(start_date)) &
                 (self.seo_pages['Mon-Year'] <= pd.to_datetime(end_date))
             ]
-
+            #(r'([^/]+)$')[0]
             if item_numbers:
+                #filtered_pages = filtered_pages[filtered_pages['Page'].str.contains('|'.join(item_numbers))]
                 filtered_pages.loc[:, 'First Level'] = filtered_pages['Page'].str.split('/').str[1]
-                filtered_pages.loc[:, 'Item Number'] = filtered_pages['Page'].str.extract(r'([^/]+)$')[0]
+                filtered_pages.loc[:,'Item Number']= filtered_pages['Page'].str.extract(r'([^/]+)$')[0]
 
-                # Remove rows with blank 'First Level'
+                # if the first level is " " then remove
                 filtered_pages = filtered_pages[filtered_pages['First Level'] != " "]
 
             self.update_metrics(filtered_pages)
@@ -127,6 +126,8 @@ class SEOAnalysisDashboard:
             messagebox.showerror("Update Error", f"An error occurred: {e}")
 
     def update_metrics(self, filtered_pages):
+
+        #metrics on mean or sum
         total_clicks = filtered_pages['Clicks'].sum()
         total_impressions = filtered_pages['Impressions'].sum()
         avg_ctr = filtered_pages['CTR'].mean() * 100 if not filtered_pages.empty else 0
@@ -145,8 +146,7 @@ class SEOAnalysisDashboard:
             'CTR': 'mean',
             'Position': 'mean'
         }).sort_values('Clicks', ascending=False)
-
-        # Limit to top 7 First Level products
+        #first 7
         page_performance = page_performance.head(7)
 
         for first_level, row in page_performance.iterrows():
