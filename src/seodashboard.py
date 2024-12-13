@@ -129,7 +129,6 @@ class SEOAnalysisDashboard:
 
             #a
             if item_numbers:
-                #filtered_pages = filtered_pages[filtered_pages['Page'].str.contains('|'.join(item_numbers))]
                 filtered_pages.loc[:, 'First Level'] = filtered_pages['Page'].str.split('/').str[1]
                 filtered_pages.loc[:,'Item Number']= filtered_pages['Page'].str.extract(r'([^/]+)$')[0]
                 filtered_pages = filtered_pages[filtered_pages['First Level'] != " "]
@@ -137,7 +136,10 @@ class SEOAnalysisDashboard:
             self.update_metrics(filtered_pages)
             self.populate_page_performance_tree(filtered_pages)
 
+
+            #(r'([^/]+)$')[0]
             # Filter queries based on product group and date range
+
             filtered_queries = self.seo_queries[
                 (self.seo_queries['Mon-Year'] >= pd.to_datetime(start_date)) &
                 (self.seo_queries['Mon-Year'] <= pd.to_datetime(end_date))
@@ -197,3 +199,5 @@ def start_app():
 
 if __name__ == "__main__":
     start_app()
+
+#filtered_pages.loc[:,'Item Number']= filtered_pages['Page'].str.extract(r'([^/]+)$')[0]
