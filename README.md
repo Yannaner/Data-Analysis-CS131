@@ -9,7 +9,6 @@ This project contains several Python scripts designed for analyzing and visualiz
 - **data_correlation.py**: This script performs advanced data analysis by loading various data sources (SEO queries, traffic data, leads data) and computes correlations between them. It includes functions for:
   - Loading data sources.
   - Creating composite keys for data merging.
-  - Performing Principal Component Analysis (PCA) and Linear Regression.
   - Visualizing correlations and generating a comprehensive report.
 
 - **leadanalysis.py**: This script processes product and product request data to count the occurrences of products in requests. It filters valid product IDs and generates a bar chart of the top 10 products based on lead count.
