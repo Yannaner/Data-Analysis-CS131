@@ -14,7 +14,7 @@ class AdvancedDataAnalyzer:
     def __init__(self):
         self.data_sources = {}
         self.correlation_matrix = None
-        self.openai_api_key = "sk-Tdacw0oH88psakmesW7gqy4koThjB7TAs-dfPbFyvWT3BlbkFJ43g2710o707BsEDSBtDQXqzfW48K246YgiTgn3DtUA"  
+        self.openai_api_key = ""  
 
     #fuzzy matching by normalizing
 
