@@ -35,9 +35,10 @@ def process_files():
 
 
         product_data['Product ID'] = product_data['Products Requested'].apply(extract_product_id)
-        cleaned_product_data = cleaned_product_data[~cleaned_product_data['Product ID'].isin(['-'])]
+        cleaned_product_data = product_data[~product_data['Product ID'].isin(['-'])]
+
         #if none then remove the data
-        #cleaned_product_data = product_data.dropna(subset=['Product ID'])
+        cleaned_product_data = product_data.dropna(subset=['Product ID'])
 
         #counting occurence of different product in product
         product_counts = cleaned_product_data['Product ID'].value_counts().reset_index()
@@ -50,11 +51,11 @@ def process_files():
         ]
 
         #csv and database files
-        #cleaned_csv_path = 'cleaned_product_counts.csv'
-        #cleaned_product_counts.to_csv(cleaned_csv_path, index=False)
-        #db_path = 'mydb.db'
-        #conn = sqlite3.connect(db_path)
-        #cleaned_product_counts.to_sql('cleaned_product_counts', conn, if_exists='replace', index=False)
+        # cleaned_csv_path = 'cleaned_product_counts.csv'
+        # cleaned_product_counts.to_csv(cleaned_csv_path, index=False)
+        # db_path = 'mydb.db'
+        # conn = sqlite3.connect(db_path)
+        # cleaned_product_counts.to_sql('cleaned_product_counts', conn, if_exists='replace', index=False)
         # conn.commit()
         # conn.close()
 
