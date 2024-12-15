@@ -5,6 +5,7 @@ from leadanalysis import process_files, extract_product_id
 from seoqueriesanalysis import upload_file
 from data_correlation import launch_advanced_data_analysis
 from seodashboard import SEOAnalysisDashboard
+from trafficdashboard import create_dashboard  
 
 class MainApp:
     def __init__(self, root):
@@ -86,7 +87,7 @@ class MainApp:
             fg="black", 
             relief="solid", 
             width=15, 
-            command=self.open_traffic_analysis
+            command=self.open_traffic_dashboard  #
         )
 
         # Group Buttons in Grid
@@ -130,6 +131,9 @@ class MainApp:
             messagebox.showerror("No Data", "Please upload traffic data first.")
             return
         perform_analysis(self.data)
+
+    def open_traffic_dashboard(self):  
+        create_dashboard()
 
     def open_seo_dashboard(self):
         seo_root = tk.Toplevel(self.root)
